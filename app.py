@@ -1,20 +1,30 @@
+import os
+import sys
+
+# 1. Force-Install scikit-learn if missing before any other imports
+try:
+    import sklearn
+except ImportError:
+    os.system(f"{sys.executable} -m pip install scikit-learn")
 
 import streamlit as st
 import pandas as pd
 import numpy as np
 import pickle
 
-# 1. Load the exported deployment files safely
+# Define the exact columns the model expects (Fixed NameError)
+feature_columns = ['N', 'P', 'K', 'temperature', 'humidity', 'ph', 'rainfall', 'N_P_Ratio', 'Climate_Strain']
+
+# 2. Load the exported deployment files safely
 try:
     with open('best_crop_model.pkl', 'rb') as model_file:
         model = pickle.load(model_file)
     with open('feature_scaler.pkl', 'rb') as scaler_file:
         scaler = pickle.load(scaler_file)
-    feature_columns = ['N', 'P', 'K', 'temperature', 'humidity', 'ph', 'rainfall', 'N_P_Ratio', 'Climate_Strain']
 except Exception as e:
     st.error(f"Initialization Error: Core assets missing or corrupted. Details: {e}")
 
-# 2. User Interface Configuration
+# 3. User Interface Configuration
 st.set_page_config(page_title="AI Agriculture System", page_icon="🌱", layout="centered")
 
 st.title("🌱 Intelligent Crop Recommendation System")
@@ -38,10 +48,9 @@ with col2:
 
 st.markdown("---")
 
-# 3. Execution Pipeline Action
+# 4. Execution Pipeline Action
 if st.button("🚀 Recommend Optimal Crop", use_container_width=True):
     with st.spinner("Analyzing parameters..."):
-        # Explicit math conversions to avoid missing attribute structures
         n_p_ratio = float(N) / (float(P) + 1e-5)
         climate_strain = float(temp) * float(humidity)
         
