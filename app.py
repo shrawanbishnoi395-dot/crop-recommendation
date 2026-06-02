@@ -1,3 +1,17 @@
+*(Make sure there is a hyphen `-` in `scikit-learn`, not an underscore, and no spaces).*
+4. Scroll down and click the green **"Commit changes"** button.
+
+---
+
+### Step 2: Fix the Code in `app.py`
+
+The error on line 47 happens because your `app.py` script uses the old library name (`pickle`) instead of loading it through `joblib` or the backend configuration is pointing to an un-imported module.
+
+1. Go back to your main repository page on GitHub.
+2. Click on **`app.py`**, click the **pencil icon** to edit.
+3. Completely replace all the text inside with this clean, updated deployment version:
+
+```python
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -39,15 +53,18 @@ st.markdown("---")
 
 # 3. Execution Pipeline Action
 if st.button("🚀 Recommend Optimal Crop", use_container_width=True):
-    with st.spinner("Analyzing parameters and identifying sweet spots..."):
-        n_p_ratio = N / (P + 1e-5)
-        climate_strain = temp * humidity
+    with st.spinner("Analyzing parameters..."):
+        # Explicit math conversions to avoid missing attribute structures
+        n_p_ratio = float(N) / (float(P) + 1e-5)
+        climate_strain = float(temp) * float(humidity)
         
-        input_data = pd.DataFrame([[N, P, K, temp, humidity, ph, rainfall, n_p_ratio, climate_strain]], 
+        input_data = pd.DataFrame([[float(N), float(P), float(K), float(temp), float(humidity), float(ph), float(rainfall), n_p_ratio, climate_strain]], 
                                   columns=feature_columns)
         
-        input_scaled = scaler.transform(input_data)
-        recommended_crop = model.predict(input_scaled)[0]
-        
-        st.balloons()
-        st.success(f"### 🎉 Recommended Crop: **{recommended_crop.upper()}**")
+        try:
+            input_scaled = scaler.transform(input_data)
+            recommended_crop = model.predict(input_scaled)[0]
+            st.balloons()
+            st.success(f"### 🎉 Recommended Crop: **{str(recommended_crop).upper()}**")
+        except Exception as eval_error:
+            st.error(f"Execution Error during model evaluation: {eval_error}")
