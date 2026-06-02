@@ -4,9 +4,6 @@ import numpy as np
 import pickle
 import joblib
 
-# Define the exact columns the model expects (MUST match training data EXACTLY)
-feature_columns = ['Nitrogen', 'Phosphorus', 'Potassium', 'Temperature', 'Humidity', 'pH_Value', 'Rainfall', 'N_P_Ratio', 'Climate_Strain']
-
 # Load the exported deployment files safely
 @st.cache_resource
 def load_model_and_scaler():
@@ -26,6 +23,14 @@ def load_model_and_scaler():
 
 try:
     model, scaler = load_model_and_scaler()
+    # Get the actual feature names from the scaler
+    if hasattr(scaler, 'get_feature_names_out'):
+        feature_columns = list(scaler.get_feature_names_out())
+    elif hasattr(scaler, 'feature_names_in_'):
+        feature_columns = list(scaler.feature_names_in_)
+    else:
+        # Fallback: Use the features the scaler was fitted on
+        feature_columns = ['Nitrogen', 'Phosphorus', 'Potassium', 'Temperature', 'Humidity', 'pH_Value', 'Rainfall']
 except Exception as e:
     st.error(f"❌ Initialization Error: Core assets missing or corrupted. Details: {e}")
     st.stop()
@@ -58,17 +63,19 @@ st.markdown("---")
 if st.button("🚀 Recommend Optimal Crop", use_container_width=True):
     with st.spinner("Analyzing parameters..."):
         try:
-            n_p_ratio = float(Nitrogen) / (float(Phosphorus) + 1e-5)
-            climate_strain = float(Temperature) * float(Humidity)
-            
+            # Create input data with only the base features (no engineered features yet)
             input_data = pd.DataFrame(
-                [[float(Nitrogen), float(Phosphorus), float(Potassium), float(Temperature), float(Humidity), float(pH_Value), float(Rainfall), n_p_ratio, climate_strain]], 
-                columns=feature_columns
+                [[float(Nitrogen), float(Phosphorus), float(Potassium), float(Temperature), float(Humidity), float(pH_Value), float(Rainfall)]], 
+                columns=['Nitrogen', 'Phosphorus', 'Potassium', 'Temperature', 'Humidity', 'pH_Value', 'Rainfall']
             )
             
+            # Scale the input data
             input_scaled = scaler.transform(input_data)
+            
+            # Predict result
             recommended_crop = model.predict(input_scaled)[0]
             st.balloons()
             st.success(f"### 🎉 Recommended Crop: **{str(recommended_crop).upper()}**")
         except Exception as eval_error:
             st.error(f"❌ Execution Error during model evaluation: {eval_error}")
+            st.write(f"Expected features: {feature_columns}")
