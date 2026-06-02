@@ -1,30 +1,36 @@
-import os
-import sys
-
-# 1. Force-Install scikit-learn if missing before any other imports
-try:
-    import sklearn
-except ImportError:
-    os.system(f"{sys.executable} -m pip install scikit-learn")
-
 import streamlit as st
 import pandas as pd
 import numpy as np
 import pickle
+import joblib
 
-# Define the exact columns the model expects (Fixed NameError)
+# Define the exact columns the model expects
 feature_columns = ['N', 'P', 'K', 'temperature', 'humidity', 'ph', 'rainfall', 'N_P_Ratio', 'Climate_Strain']
 
-# 2. Load the exported deployment files safely
-try:
-    with open('best_crop_model.pkl', 'rb') as model_file:
-        model = pickle.load(model_file)
-    with open('feature_scaler.pkl', 'rb') as scaler_file:
-        scaler = pickle.load(scaler_file)
-except Exception as e:
-    st.error(f"Initialization Error: Core assets missing or corrupted. Details: {e}")
+# Load the exported deployment files safely
+@st.cache_resource
+def load_model_and_scaler():
+    try:
+        # Try joblib first (more robust for sklearn objects)
+        with open('best_crop_model.pkl', 'rb') as model_file:
+            model = joblib.load(model_file)
+        with open('feature_scaler.pkl', 'rb') as scaler_file:
+            scaler = joblib.load(scaler_file)
+    except:
+        # Fallback to pickle
+        with open('best_crop_model.pkl', 'rb') as model_file:
+            model = pickle.load(model_file)
+        with open('feature_scaler.pkl', 'rb') as scaler_file:
+            scaler = pickle.load(scaler_file)
+    return model, scaler
 
-# 3. User Interface Configuration
+try:
+    model, scaler = load_model_and_scaler()
+except Exception as e:
+    st.error(f"❌ Initialization Error: Core assets missing or corrupted. Details: {e}")
+    st.stop()
+
+# User Interface Configuration
 st.set_page_config(page_title="AI Agriculture System", page_icon="🌱", layout="centered")
 
 st.title("🌱 Intelligent Crop Recommendation System")
@@ -48,19 +54,21 @@ with col2:
 
 st.markdown("---")
 
-# 4. Execution Pipeline Action
+# Execution Pipeline Action
 if st.button("🚀 Recommend Optimal Crop", use_container_width=True):
     with st.spinner("Analyzing parameters..."):
-        n_p_ratio = float(N) / (float(P) + 1e-5)
-        climate_strain = float(temp) * float(humidity)
-        
-        input_data = pd.DataFrame([[float(N), float(P), float(K), float(temp), float(humidity), float(ph), float(rainfall), n_p_ratio, climate_strain]], 
-                                  columns=feature_columns)
-        
         try:
+            n_p_ratio = float(N) / (float(P) + 1e-5)
+            climate_strain = float(temp) * float(humidity)
+            
+            input_data = pd.DataFrame(
+                [[float(N), float(P), float(K), float(temp), float(humidity), float(ph), float(rainfall), n_p_ratio, climate_strain]], 
+                columns=feature_columns
+            )
+            
             input_scaled = scaler.transform(input_data)
             recommended_crop = model.predict(input_scaled)[0]
             st.balloons()
             st.success(f"### 🎉 Recommended Crop: **{str(recommended_crop).upper()}**")
         except Exception as eval_error:
-            st.error(f"Execution Error during model evaluation: {eval_error}")
+            st.error(f"❌ Execution Error during model evaluation: {eval_error}")
