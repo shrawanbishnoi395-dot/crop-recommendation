@@ -1,17 +1,4 @@
-*(Make sure there is a hyphen `-` in `scikit-learn`, not an underscore, and no spaces).*
-4. Scroll down and click the green **"Commit changes"** button.
 
----
-
-### Step 2: Fix the Code in `app.py`
-
-The error on line 47 happens because your `app.py` script uses the old library name (`pickle`) instead of loading it through `joblib` or the backend configuration is pointing to an un-imported module.
-
-1. Go back to your main repository page on GitHub.
-2. Click on **`app.py`**, click the **pencil icon** to edit.
-3. Completely replace all the text inside with this clean, updated deployment version:
-
-```python
 import streamlit as st
 import pandas as pd
 import numpy as np
