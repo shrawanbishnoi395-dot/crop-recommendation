@@ -4,8 +4,8 @@ import numpy as np
 import pickle
 import joblib
 
-# Define the exact columns the model expects
-feature_columns = ['N', 'P', 'K', 'temperature', 'humidity', 'ph', 'rainfall', 'N_P_Ratio', 'Climate_Strain']
+# Define the exact columns the model expects (MUST match training data)
+feature_columns = ['Nitrogen', 'Phosphorus', 'Potassium', 'temperature', 'Humidity', 'ph', 'Rainfall', 'N_P_Ratio', 'Climate_Strain']
 
 # Load the exported deployment files safely
 @st.cache_resource
@@ -41,16 +41,16 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("🧪 Soil Nutrients")
-    N = st.slider("Nitrogen (N) Content", min_value=0, max_value=150, value=50)
-    P = st.slider("Phosphorus (P) Content", min_value=5, max_value=150, value=50)
-    K = st.slider("Potassium (K) Content", min_value=5, max_value=210, value=50)
+    Nitrogen = st.slider("Nitrogen (N) Content", min_value=0, max_value=150, value=50)
+    Phosphorus = st.slider("Phosphorus (P) Content", min_value=5, max_value=150, value=50)
+    Potassium = st.slider("Potassium (K) Content", min_value=5, max_value=210, value=50)
     ph = st.slider("Soil pH Level", min_value=3.5, max_value=10.0, value=6.5, step=0.1)
 
 with col2:
     st.subheader("🌤️ Environmental Factors")
-    temp = st.slider("Temperature (°C)", min_value=8.0, max_value=50.0, value=25.0, step=0.5)
-    humidity = st.slider("Relative Humidity (%)", min_value=14.0, max_value=100.0, value=70.0, step=0.5)
-    rainfall = st.slider("Rainfall (mm)", min_value=20.0, max_value=300.0, value=100.0, step=1.0)
+    temperature = st.slider("Temperature (°C)", min_value=8.0, max_value=50.0, value=25.0, step=0.5)
+    Humidity = st.slider("Relative Humidity (%)", min_value=14.0, max_value=100.0, value=70.0, step=0.5)
+    Rainfall = st.slider("Rainfall (mm)", min_value=20.0, max_value=300.0, value=100.0, step=1.0)
 
 st.markdown("---")
 
@@ -58,11 +58,11 @@ st.markdown("---")
 if st.button("🚀 Recommend Optimal Crop", use_container_width=True):
     with st.spinner("Analyzing parameters..."):
         try:
-            n_p_ratio = float(N) / (float(P) + 1e-5)
-            climate_strain = float(temp) * float(humidity)
+            n_p_ratio = float(Nitrogen) / (float(Phosphorus) + 1e-5)
+            climate_strain = float(temperature) * float(Humidity)
             
             input_data = pd.DataFrame(
-                [[float(N), float(P), float(K), float(temp), float(humidity), float(ph), float(rainfall), n_p_ratio, climate_strain]], 
+                [[float(Nitrogen), float(Phosphorus), float(Potassium), float(temperature), float(Humidity), float(ph), float(Rainfall), n_p_ratio, climate_strain]], 
                 columns=feature_columns
             )
             
