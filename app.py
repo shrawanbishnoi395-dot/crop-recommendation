@@ -4,8 +4,8 @@ import numpy as np
 import pickle
 import joblib
 
-# Define the exact columns the model expects (MUST match training data)
-feature_columns = ['N', 'P', 'K', 'Temperature', 'Humidity', 'pH_Value', 'Rainfall', 'N_P_Ratio', 'Climate_Strain']
+# Define the exact columns the model expects (MUST match training data EXACTLY)
+feature_columns = ['Nitrogen', 'Phosphorus', 'Potassium', 'Temperature', 'Humidity', 'pH_Value', 'Rainfall', 'N_P_Ratio', 'Climate_Strain']
 
 # Load the exported deployment files safely
 @st.cache_resource
@@ -41,9 +41,9 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("🧪 Soil Nutrients")
-    N = st.slider("Nitrogen (N) Content", min_value=0, max_value=150, value=50)
-    P = st.slider("Phosphorus (P) Content", min_value=5, max_value=150, value=50)
-    K = st.slider("Potassium (K) Content", min_value=5, max_value=210, value=50)
+    Nitrogen = st.slider("Nitrogen (N) Content", min_value=0, max_value=150, value=50)
+    Phosphorus = st.slider("Phosphorus (P) Content", min_value=5, max_value=150, value=50)
+    Potassium = st.slider("Potassium (K) Content", min_value=5, max_value=210, value=50)
     pH_Value = st.slider("Soil pH Level", min_value=3.5, max_value=10.0, value=6.5, step=0.1)
 
 with col2:
@@ -58,11 +58,11 @@ st.markdown("---")
 if st.button("🚀 Recommend Optimal Crop", use_container_width=True):
     with st.spinner("Analyzing parameters..."):
         try:
-            n_p_ratio = float(N) / (float(P) + 1e-5)
+            n_p_ratio = float(Nitrogen) / (float(Phosphorus) + 1e-5)
             climate_strain = float(Temperature) * float(Humidity)
             
             input_data = pd.DataFrame(
-                [[float(N), float(P), float(K), float(Temperature), float(Humidity), float(pH_Value), float(Rainfall), n_p_ratio, climate_strain]], 
+                [[float(Nitrogen), float(Phosphorus), float(Potassium), float(Temperature), float(Humidity), float(pH_Value), float(Rainfall), n_p_ratio, climate_strain]], 
                 columns=feature_columns
             )
             
