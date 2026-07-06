@@ -186,22 +186,22 @@ if st.button("🚀 Recommend Crop", use_container_width=True):
             f"{medal} **{model.classes_[idx]}** — {probability[idx]*100:.2f}%"
         )
 
-  with st.expander("📋 Input Summary", expanded=True):
+    with st.expander("📋 Input Summary", expanded=True):
 
-    col1, col2 = st.columns(2)
+        col1, col2 = st.columns(2)
 
-    with col1:
-        st.metric("Nitrogen", Nitrogen)
-        st.metric("Phosphorus", Phosphorus)
-        st.metric("Potassium", Potassium)
-        st.metric("pH", pH_Value)
+        with col1:
+            st.metric("Nitrogen", Nitrogen)
+            st.metric("Phosphorus", Phosphorus)
+            st.metric("Potassium", Potassium)
+            st.metric("pH", pH_Value)
 
-    with col2:
-        st.metric("Temperature", f"{Temperature} °C")
-        st.metric("Humidity", f"{Humidity}%")
-        st.metric("Rainfall", f"{Rainfall} mm")
+        with col2:
+            st.metric("Temperature", f"{Temperature} °C")
+            st.metric("Humidity", f"{Humidity}%")
+            st.metric("Rainfall", f"{Rainfall} mm")
 
-    st.balloons()
+        st.balloons()
 
 st.markdown("---")
 
