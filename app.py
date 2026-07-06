@@ -186,7 +186,7 @@ if st.button("🚀 Recommend Crop", use_container_width=True):
             f"{medal} **{model.classes_[idx]}** — {probability[idx]*100:.2f}%"
         )
 
-   with st.expander("📋 Input Summary", expanded=True):
+  with st.expander("📋 Input Summary", expanded=True):
 
     col1, col2 = st.columns(2)
 
